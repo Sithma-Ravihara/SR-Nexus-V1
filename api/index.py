@@ -5,9 +5,13 @@ import sys
 import os
 
 # Project root එක Python path එකට add කිරීම
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
 
 from backend.search import search_documents
+from backend.ranking import rank_results
 
 
 DOCUMENTS = [
@@ -30,6 +34,11 @@ DOCUMENTS = [
         "title": "Technology",
         "content": "Technology includes computers, software, artificial intelligence and modern digital systems.",
         "url": "#"
+    },
+    {
+        "title": "Python Web Development",
+        "content": "Python can be used for backend web development with frameworks such as FastAPI and Django.",
+        "url": "https://www.python.org/"
     }
 ]
 
@@ -43,13 +52,32 @@ class handler(BaseHTTPRequestHandler):
 
         query = params.get("q", [""])[0]
 
-        results = search_documents(query, DOCUMENTS)
+        if not query.strip():
+            response = {
+                "query": "",
+                "count": 0,
+                "results": []
+            }
 
-        response = {
-            "query": query,
-            "count": len(results),
-            "results": results
-        }
+        else:
+
+            # Step 1: Search
+            results = search_documents(
+                query,
+                DOCUMENTS
+            )
+
+            # Step 2: Rank results
+            results = rank_results(
+                query,
+                results
+            )
+
+            response = {
+                "query": query,
+                "count": len(results),
+                "results": results
+            }
 
         body = json.dumps(
             response,
