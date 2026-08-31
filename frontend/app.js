@@ -2,7 +2,6 @@ const searchForm = document.getElementById("searchForm");
 const searchInput = document.getElementById("searchInput");
 
 searchForm.addEventListener("submit", function (event) {
-
     event.preventDefault();
 
     const query = searchInput.value.trim();
@@ -18,14 +17,8 @@ searchForm.addEventListener("submit", function (event) {
 
 async function search(query) {
 
-    /*
-     * Backend API
-     *
-     * Local development:
-     * http://127.0.0.1:8000/api/search
-     */
-
-    const API_URL = "http://127.0.0.1:8000/api/search";
+    // Online SR Nexus Backend API
+    const API_URL = "https://sr-nexus-v1.vercel.app/api/search";
 
     try {
 
@@ -34,7 +27,7 @@ async function search(query) {
         );
 
         if (!response.ok) {
-            throw new Error("Search API error");
+            throw new Error(`Search API error: ${response.status}`);
         }
 
         const data = await response.json();
@@ -47,23 +40,25 @@ async function search(query) {
 
     } catch (error) {
 
-        console.error(error);
+        console.error("SR Nexus API Error:", error);
 
         alert(
-            "SR Search API is not connected yet."
+            "SR Search API connection failed.\n\nPlease try again."
         );
     }
 }
 
 
+// Quick search buttons
 document
     .querySelectorAll(".quick-actions button")
     .forEach(button => {
 
         button.addEventListener("click", () => {
 
-            searchInput.value =
-                button.dataset.query;
+            const query = button.dataset.query;
+
+            searchInput.value = query;
 
             searchInput.focus();
 
