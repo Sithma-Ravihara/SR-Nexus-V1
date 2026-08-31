@@ -12,23 +12,49 @@ searchForm.addEventListener("submit", function (event) {
         return;
     }
 
-    /*
-     * Temporary search action.
-     *
-     * Backend API එක හදනකම්
-     * search query එක URL එකට පෙන්වනවා.
-     */
-
-    const searchURL =
-        `?q=${encodeURIComponent(query)}`;
-
-    window.location.href = searchURL;
+    search(query);
 });
 
 
-/*
- * Quick search buttons
- */
+async function search(query) {
+
+    /*
+     * Backend API
+     *
+     * Local development:
+     * http://127.0.0.1:8000/api/search
+     */
+
+    const API_URL = "http://127.0.0.1:8000/api/search";
+
+    try {
+
+        const response = await fetch(
+            `${API_URL}?q=${encodeURIComponent(query)}`
+        );
+
+        if (!response.ok) {
+            throw new Error("Search API error");
+        }
+
+        const data = await response.json();
+
+        console.log("SR Nexus Results:", data);
+
+        alert(
+            `Search completed!\n\nQuery: ${data.query}\nResults: ${data.results.length}`
+        );
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert(
+            "SR Search API is not connected yet."
+        );
+    }
+}
+
 
 document
     .querySelectorAll(".quick-actions button")
@@ -36,10 +62,8 @@ document
 
         button.addEventListener("click", () => {
 
-            const query =
+            searchInput.value =
                 button.dataset.query;
-
-            searchInput.value = query;
 
             searchInput.focus();
 
