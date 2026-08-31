@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="description"
+        content="SR Nexus — A modern search experience."
+    >
+
+    <title>SR Nexus</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <main class="app">
+
+        <!-- Logo -->
+        <header class="header">
+            <a href="#" class="logo">
+                <span class="logo-mark">SR</span>
+                <span class="logo-text">Nexus</span>
+            </a>
+        </header>
+
+        <!-- Hero -->
+        <section class="hero">
+
+            <div class="badge">
+                <span class="status-dot"></span>
+                SR Search
+            </div>
+
+            <h1>
+                Search the
+                <span>Web.</span>
+            </h1>
+
+            <p class="subtitle">
+                A faster, smarter and cleaner search experience.
+            </p>
+
+            <!-- Search -->
+            <form id="searchForm" class="search-box">
+
+                <span class="search-icon">⌕</span>
+
+                <input
+                    id="searchInput"
+                    type="text"
+                    placeholder="What do you want to search?"
+                    autocomplete="off"
+                    aria-label="Search"
+                >
+
+                <button
+                    type="submit"
+                    class="search-button"
+                    aria-label="Search"
+                >
+                    Search
+                </button>
+
+            </form>
+
+            <!-- Quick actions -->
+            <div class="quick-actions">
+
+                <button data-query="latest technology">
+                    ✦ Technology
+                </button>
+
+                <button data-query="programming tutorials">
+                    ◈ Programming
+                </button>
+
+                <button data-query="Sri Lanka">
+                    ◎ Sri Lanka
+                </button>
+
+            </div>
+
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <span>© 2026 SR Nexus</span>
+            <span>Built for the future.</span>
+        </footer>
+
+    </main>
+
+    <script src="app.js"></script>
+
+</body>
+  </html>
