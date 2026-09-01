@@ -13,6 +13,7 @@ if PROJECT_ROOT not in sys.path:
 
 from backend.search import search_documents
 from backend.ranking import rank_results
+from api.search import real_web_search
 
 
 DOCUMENTS = [
@@ -51,9 +52,9 @@ class handler(BaseHTTPRequestHandler):
         parsed = urlparse(self.path)
         params = parse_qs(parsed.query)
 
-        query = params.get("q", [""])[0]
+        query = params.get("q", [""])[0].strip()
 
-        if not query.strip():
+        if not query:
 
             response = {
                 "query": "",
@@ -63,11 +64,20 @@ class handler(BaseHTTPRequestHandler):
 
         else:
 
+            # Local SR Nexus search
             results = search_documents(
                 query,
                 DOCUMENTS
             )
 
+            # Real Web Search
+            try:
+                web_results = real_web_search(query)
+                results.extend(web_results)
+            except Exception:
+                web_results = []
+
+            # SR Nexus Ranking
             results = rank_results(
                 query,
                 results
