@@ -3,18 +3,14 @@ from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
 
-# මේක දැනට placeholder එකක්.
-# Working search provider එක තෝරගත්තට පස්සේ මෙතන URL එක දානවා.
-SEARCH_API_URL = ""
+SEARCH_API_URL = "https://search.bus-hit.me/search"
 
 
 def real_web_search(query):
-    if not SEARCH_API_URL:
-        return []
-
     params = urlencode({
         "q": query,
-        "format": "json"
+        "format": "json",
+        "language": "en"
     })
 
     url = f"{SEARCH_API_URL}?{params}"
@@ -27,9 +23,7 @@ def real_web_search(query):
     )
 
     with urlopen(request, timeout=10) as response:
-        data = json.loads(
-            response.read().decode("utf-8")
-        )
+        data = json.loads(response.read().decode("utf-8"))
 
     results = []
 
@@ -37,10 +31,7 @@ def real_web_search(query):
         results.append({
             "title": item.get("title", ""),
             "url": item.get("url", ""),
-            "description": item.get(
-                "content",
-                item.get("description", "")
-            )
+            "description": item.get("content", "")
         })
 
     return results
