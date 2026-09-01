@@ -1,39 +1,42 @@
-import json
-from urllib.parse import urlencode
-from urllib.request import Request, urlopen
+def search_documents(query, documents):
+    query = query.strip().lower()
 
+    if not query:
+        return []
 
-SEARCH_API_URL = "https://search.bus-hit.me/search"
-
-
-def real_web_search(query):
-    params = urlencode({
-        "q": query,
-        "format": "json",
-        "language": "en"
-    })
-
-    url = f"{SEARCH_API_URL}?{params}"
-
-    request = Request(
-        url,
-        headers={
-            "User-Agent": "SR-Nexus/1.0"
-        }
-    )
-
-    with urlopen(request, timeout=10) as response:
-        data = json.loads(
-            response.read().decode("utf-8")
-        )
-
+    query_words = query.split()
     results = []
 
-    for item in data.get("results", [])[:10]:
-        results.append({
-            "title": item.get("title", ""),
-            "url": item.get("url", ""),
-            "description": item.get("content", "")
-        })
+    for document in documents:
+        title = document.get("title", "")
+        content = document.get("content", "")
+        url = document.get("url", "")
+
+        text = f"{title} {content}".lower()
+
+        score = 0
+
+        # Exact query match
+        if query in title.lower():
+            score += 10
+
+        if query in content.lower():
+            score += 5
+
+        # Individual word matching
+        for word in query_words:
+            if word in title.lower():
+                score += 4
+
+            if word in content.lower():
+                score += 2
+
+        if score > 0:
+            results.append({
+                "title": title,
+                "url": url,
+                "description": content,
+                "score": score
+            })
 
     return results
