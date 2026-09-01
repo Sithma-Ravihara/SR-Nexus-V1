@@ -13,6 +13,7 @@ if PROJECT_ROOT not in sys.path:
 
 from backend.search import search_documents
 from backend.ranking import rank_results
+from api.search import real_web_search
 
 
 DOCUMENTS = [
@@ -35,11 +36,6 @@ DOCUMENTS = [
         "title": "Technology",
         "content": "Technology includes computers, software, artificial intelligence and modern digital systems.",
         "url": "#"
-    },
-    {
-        "title": "Python Web Development",
-        "content": "Python can be used for backend web development with frameworks such as FastAPI and Django.",
-        "url": "https://www.python.org/"
     }
 ]
 
@@ -51,9 +47,9 @@ class handler(BaseHTTPRequestHandler):
         parsed = urlparse(self.path)
         params = parse_qs(parsed.query)
 
-        query = params.get("q", [""])[0]
+        query = params.get("q", [""])[0].strip()
 
-        if not query.strip():
+        if not query:
 
             response = {
                 "query": "",
@@ -63,13 +59,32 @@ class handler(BaseHTTPRequestHandler):
 
         else:
 
-            # Search local documents
+            # Existing SR Nexus results
             results = search_documents(
                 query,
                 DOCUMENTS
             )
 
-            # Rank results
+            # Real Web results
+            try:
+
+                web_results = real_web_search(query)
+
+                results.extend(web_results)
+
+            except Exception as e:
+
+                response = {
+                    "query": query,
+                    "count": len(results),
+                    "results": results,
+                    "error": str(e)
+                }
+
+                self.send_json(response)
+                return
+
+            # Ranking
             results = rank_results(
                 query,
                 results
@@ -80,6 +95,11 @@ class handler(BaseHTTPRequestHandler):
                 "count": len(results),
                 "results": results
             }
+
+        self.send_json(response)
+
+
+    def send_json(self, response):
 
         body = json.dumps(
             response,
