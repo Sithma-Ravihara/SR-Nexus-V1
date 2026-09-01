@@ -55,7 +55,6 @@ class handler(BaseHTTPRequestHandler):
         query = params.get("q", [""])[0].strip()
 
         if not query:
-
             response = {
                 "query": "",
                 "count": 0,
@@ -64,7 +63,7 @@ class handler(BaseHTTPRequestHandler):
 
         else:
 
-            # Local SR Nexus search
+            # Existing SR Nexus search
             results = search_documents(
                 query,
                 DOCUMENTS
@@ -74,8 +73,42 @@ class handler(BaseHTTPRequestHandler):
             try:
                 web_results = real_web_search(query)
                 results.extend(web_results)
-            except Exception:
-                web_results = []
+
+            except Exception as e:
+
+                response = {
+                    "query": query,
+                    "count": len(results),
+                    "results": results,
+                    "error": str(e)
+                }
+
+                body = json.dumps(
+                    response,
+                    ensure_ascii=False
+                ).encode("utf-8")
+
+                self.send_response(200)
+
+                self.send_header(
+                    "Content-Type",
+                    "application/json; charset=utf-8"
+                )
+
+                self.send_header(
+                    "Access-Control-Allow-Origin",
+                    "*"
+                )
+
+                self.send_header(
+                    "Content-Length",
+                    str(len(body))
+                )
+
+                self.end_headers()
+
+                self.wfile.write(body)
+                return
 
             # SR Nexus Ranking
             results = rank_results(
