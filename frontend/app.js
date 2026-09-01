@@ -1,8 +1,7 @@
 const searchForm = document.getElementById("searchForm");
 const searchInput = document.getElementById("searchInput");
 
-const API_URL = "https://sr-nexus-v1.vercel.app/api/search";
-
+const API_URL = "https://sr-nexus-v2.vercel.app/api";
 
 // ========================================
 // RESULTS CONTAINER
@@ -11,7 +10,6 @@ const API_URL = "https://sr-nexus-v1.vercel.app/api/search";
 let resultsContainer = document.getElementById("searchResults");
 
 if (!resultsContainer) {
-
     resultsContainer = document.createElement("div");
 
     resultsContainer.id = "searchResults";
@@ -23,13 +21,11 @@ if (!resultsContainer) {
     searchForm.parentNode.appendChild(resultsContainer);
 }
 
-
 // ========================================
 // SEARCH FORM
 // ========================================
 
 searchForm.addEventListener("submit", function (event) {
-
     event.preventDefault();
 
     const query = searchInput.value.trim();
@@ -41,7 +37,6 @@ searchForm.addEventListener("submit", function (event) {
 
     search(query);
 });
-
 
 // ========================================
 // SEARCH API
@@ -61,22 +56,17 @@ async function search(query) {
         </div>
     `;
 
-
     try {
 
         const response = await fetch(
             `${API_URL}?q=${encodeURIComponent(query)}`
         );
 
-
         if (!response.ok) {
-
             throw new Error(
                 `API Error: ${response.status}`
             );
-
         }
-
 
         const data = await response.json();
 
@@ -85,9 +75,7 @@ async function search(query) {
             data
         );
 
-
         displayResults(data);
-
 
     } catch (error) {
 
@@ -95,7 +83,6 @@ async function search(query) {
             "SR Nexus API Error:",
             error
         );
-
 
         resultsContainer.innerHTML = `
             <div style="
@@ -111,13 +98,17 @@ async function search(query) {
                     SR Nexus API could not be reached.
                 </p>
 
+                <p style="
+                    opacity:0.6;
+                    font-size:13px;
+                ">
+                    ${escapeHTML(error.message)}
+                </p>
+
             </div>
         `;
-
     }
-
 }
-
 
 // ========================================
 // DISPLAY RESULTS
@@ -127,8 +118,6 @@ function displayResults(data) {
 
     resultsContainer.innerHTML = "";
 
-
-    // No results
     if (
         !data.results ||
         data.results.length === 0
@@ -158,12 +147,27 @@ function displayResults(data) {
                     </strong>
                 </p>
 
+                ${
+                    data.error
+                    ?
+                    `
+                    <p style="
+                        margin-top:15px;
+                        opacity:0.5;
+                        font-size:13px;
+                    ">
+                        ${escapeHTML(data.error)}
+                    </p>
+                    `
+                    :
+                    ""
+                }
+
             </div>
         `;
 
         return;
     }
-
 
     // ========================================
     // HEADER
@@ -194,7 +198,6 @@ function displayResults(data) {
 
     resultsContainer.appendChild(header);
 
-
     // ========================================
     // RESULT CARDS
     // ========================================
@@ -204,7 +207,6 @@ function displayResults(data) {
 
             const card =
                 document.createElement("div");
-
 
             card.style.marginBottom = "18px";
 
@@ -224,13 +226,11 @@ function displayResults(data) {
             card.style.boxShadow =
                 "0 10px 30px rgba(0,0,0,0.15)";
 
-
             const title =
                 escapeHTML(
                     result.title ||
                     "Untitled Result"
                 );
-
 
             const content =
                 escapeHTML(
@@ -239,10 +239,8 @@ function displayResults(data) {
                     "No description available."
                 );
 
-
             const url =
                 safeURL(result.url);
-
 
             card.innerHTML = `
 
@@ -255,14 +253,12 @@ function displayResults(data) {
                     RESULT ${index + 1}
                 </div>
 
-
                 <h3 style="
                     margin:0 0 10px 0;
                     font-size:20px;
                 ">
                     ${title}
                 </h3>
-
 
                 <p style="
                     margin:0 0 16px 0;
@@ -271,7 +267,6 @@ function displayResults(data) {
                 ">
                     ${content}
                 </p>
-
 
                 ${
                     url
@@ -296,14 +291,10 @@ function displayResults(data) {
 
             `;
 
-
             resultsContainer.appendChild(card);
-
         }
     );
-
 }
-
 
 // ========================================
 // SAFE HTML
@@ -324,7 +315,6 @@ function escapeHTML(value) {
         .replace(/'/g, "&#039;");
 }
 
-
 // ========================================
 // SAFE URL
 // ========================================
@@ -335,12 +325,10 @@ function safeURL(value) {
         return "";
     }
 
-
     try {
 
         const url =
             new URL(value);
-
 
         if (
             url.protocol === "https:" ||
@@ -350,7 +338,6 @@ function safeURL(value) {
             return escapeHTML(
                 url.href
             );
-
         }
 
     } catch (error) {
@@ -359,13 +346,10 @@ function safeURL(value) {
             "Invalid result URL:",
             value
         );
-
     }
-
 
     return "";
 }
-
 
 // ========================================
 // QUICK SEARCH BUTTONS
@@ -390,14 +374,9 @@ document
 
                 searchInput.focus();
 
-
                 if (query.trim()) {
-
                     search(query);
-
                 }
-
             }
         );
-
     });
