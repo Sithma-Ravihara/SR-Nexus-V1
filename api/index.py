@@ -13,7 +13,6 @@ if PROJECT_ROOT not in sys.path:
 
 from backend.search import search_documents
 from backend.ranking import rank_results
-from api.search import real_web_search
 
 
 DOCUMENTS = [
@@ -52,9 +51,10 @@ class handler(BaseHTTPRequestHandler):
         parsed = urlparse(self.path)
         params = parse_qs(parsed.query)
 
-        query = params.get("q", [""])[0].strip()
+        query = params.get("q", [""])[0]
 
-        if not query:
+        if not query.strip():
+
             response = {
                 "query": "",
                 "count": 0,
@@ -63,54 +63,13 @@ class handler(BaseHTTPRequestHandler):
 
         else:
 
-            # Existing SR Nexus search
+            # Search local documents
             results = search_documents(
                 query,
                 DOCUMENTS
             )
 
-            # Real Web Search
-            try:
-                web_results = real_web_search(query)
-                results.extend(web_results)
-
-            except Exception as e:
-
-                response = {
-                    "query": query,
-                    "count": len(results),
-                    "results": results,
-                    "error": str(e)
-                }
-
-                body = json.dumps(
-                    response,
-                    ensure_ascii=False
-                ).encode("utf-8")
-
-                self.send_response(200)
-
-                self.send_header(
-                    "Content-Type",
-                    "application/json; charset=utf-8"
-                )
-
-                self.send_header(
-                    "Access-Control-Allow-Origin",
-                    "*"
-                )
-
-                self.send_header(
-                    "Content-Length",
-                    str(len(body))
-                )
-
-                self.end_headers()
-
-                self.wfile.write(body)
-                return
-
-            # SR Nexus Ranking
+            # Rank results
             results = rank_results(
                 query,
                 results
