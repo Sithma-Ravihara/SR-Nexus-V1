@@ -1,94 +1,43 @@
+import os
 import json
-from urllib.parse import urlencode
 from urllib.request import Request, urlopen
-
-
-SEARCH_URL = "https://html.duckduckgo.com/html/"
 
 
 def real_web_search(query):
 
-    params = urlencode({
-        "q": query
-    })
+    api_key = os.environ.get("ec08a4b3c6f32493e8719090424e67af2c080c39")
 
-    url = SEARCH_URL + "?" + params
+    if not api_key:
+        return []
+
+    data = json.dumps({
+        "q": query,
+        "num": 10
+    }).encode("utf-8")
 
     request = Request(
-        url,
+        "https://google.serper.dev/search",
+        data=data,
         headers={
-            "User-Agent": "Mozilla/5.0 (compatible; SR-Nexus/1.0)"
-        }
+            "X-API-KEY": api_key,
+            "Content-Type": "application/json"
+        },
+        method="POST"
     )
 
     with urlopen(request, timeout=15) as response:
-        html = response.read().decode(
-            "utf-8",
-            errors="ignore"
+        result = json.loads(
+            response.read().decode("utf-8")
         )
 
     results = []
 
-    # Simple HTML extraction
-    from html.parser import HTMLParser
+    for item in result.get("organic", [])[:10]:
 
-    class SearchParser(HTMLParser):
+        results.append({
+            "title": item.get("title", ""),
+            "url": item.get("link", ""),
+            "description": item.get("snippet", "")
+        })
 
-        def __init__(self):
-            super().__init__()
-            self.results = []
-            self.current = None
-            self.in_title = False
-            self.in_description = False
-
-        def handle_starttag(self, tag, attrs):
-
-            attrs = dict(attrs)
-
-            if tag == "a" and "result__a" in attrs.get(
-                "class", ""
-            ):
-                self.current = {
-                    "title": "",
-                    "url": attrs.get("href", ""),
-                    "description": ""
-                }
-                self.in_title = True
-
-            elif (
-                tag == "a"
-                and "result__snippet" in attrs.get(
-                    "class", ""
-                )
-            ):
-                self.in_description = True
-
-        def handle_data(self, data):
-
-            if self.current:
-
-                if self.in_title:
-                    self.current["title"] += data
-
-                elif self.in_description:
-                    self.current["description"] += data
-
-        def handle_endtag(self, tag):
-
-            if tag == "a":
-
-                if self.in_title:
-                    self.in_title = False
-
-                    if self.current:
-                        self.results.append(
-                            self.current
-                        )
-                        self.current = None
-
-                self.in_description = False
-
-    parser = SearchParser()
-    parser.feed(html)
-
-    return parser.results[:10]
+    return results
