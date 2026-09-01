@@ -1,7 +1,7 @@
 const searchForm = document.getElementById("searchForm");
 const searchInput = document.getElementById("searchInput");
 
-const API_URL = "https://sr-nexus-v2.vercel.app/api";
+const API_URL = "https://sr-nexus-v1.vercel.app/api";
 
 // ========================================
 // RESULTS CONTAINER
@@ -26,6 +26,7 @@ if (!resultsContainer) {
 // ========================================
 
 searchForm.addEventListener("submit", function (event) {
+
     event.preventDefault();
 
     const query = searchInput.value.trim();
@@ -146,22 +147,6 @@ function displayResults(data) {
                         ${escapeHTML(data.query)}
                     </strong>
                 </p>
-
-                ${
-                    data.error
-                    ?
-                    `
-                    <p style="
-                        margin-top:15px;
-                        opacity:0.5;
-                        font-size:13px;
-                    ">
-                        ${escapeHTML(data.error)}
-                    </p>
-                    `
-                    :
-                    ""
-                }
 
             </div>
         `;
@@ -292,6 +277,7 @@ function displayResults(data) {
             `;
 
             resultsContainer.appendChild(card);
+
         }
     );
 }
@@ -303,15 +289,10 @@ function displayResults(data) {
 function escapeHTML(value) {
 
     return String(value)
-
         .replace(/&/g, "&amp;")
-
         .replace(/</g, "&lt;")
-
         .replace(/>/g, "&gt;")
-
         .replace(/"/g, "&quot;")
-
         .replace(/'/g, "&#039;");
 }
 
@@ -377,6 +358,8 @@ document
                 if (query.trim()) {
                     search(query);
                 }
+
             }
         );
+
     });
